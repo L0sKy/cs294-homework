@@ -23,7 +23,16 @@ target_link_libraries(cli_tests PRIVATE gtest_main)
 target_compile_definitions(cli_tests PRIVATE RUSTCC_BIN="$<TARGET_FILE:rustcc>")
 add_dependencies(cli_tests rustcc)
 
+add_executable(integration_tests
+  integration/integration_tests.cpp
+)
+
+target_link_libraries(integration_tests PRIVATE gtest_main)
+target_compile_definitions(integration_tests PRIVATE RUSTCC_BIN="$<TARGET_FILE:rustcc>")
+add_dependencies(integration_tests rustcc)
+
 include(GoogleTest)
 
 gtest_discover_tests(lexer_tests PROPERTIES LABELS unit)
 gtest_discover_tests(cli_tests PROPERTIES LABELS cli)
+gtest_discover_tests(integration_tests PROPERTIES LABELS integration)
