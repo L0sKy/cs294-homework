@@ -36,6 +36,24 @@ lexer should support:
 ( , ) , { , } , ; , : , ,
 ```
 
+### Comments
+Lexer should skip all Rust-style comments and should NOT emit tokens for them.
+Supported comment forms:
+- Line comment: starts with `//`, ends at newline or EOF.
+  - Doc comments `///` and `//!` are treated the same as line comments.
+- Block comment: starts with `/*`, ends at the matching `*/`.
+  - Doc comments `/**` and `/*!` are treated the same as block comments.
+  - Nested block comments are supported.
+
+If a block comment is unterminated, the lexer should emit an `Unknown` token
+containing the consumed comment text, report error in terminal, and continue
+to EOF.
+
+### Error Handling
+If a token is not supported or malformed (e.g. unterminated string/char),
+the lexer should emit an `Unknown` token with the consumed text and report
+error in terminal. The lexer should continue tokenization afterward.
+
 ## Data structure
 
 This section will tell the data structures which will be used.
@@ -65,3 +83,4 @@ class Token {
 ```
 This class Token is the fundamation class of the lexer, it will create object for all tokens. the TokenType is a enum, which must cover token types above, and should divide Literals into 4 types. It also need to contain EOF and Unknown, EOF means the end of the file. Unknown means the token is not support and should report error.
 
+Token should expose const getters for `type`, `value`, `line`, and `col`.

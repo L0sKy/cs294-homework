@@ -13,6 +13,9 @@ It support these args:
 --help: this arg will output all args usage.
 --lexer: this arg will output the lexer result.
 
+When `--lexer` is provided, output tokens one per line with the format:
+`TYPE value line col`, including the EOF token.
+
 ## Interface
 ```cpp
 int main(){

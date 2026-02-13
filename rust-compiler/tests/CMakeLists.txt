@@ -8,7 +8,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(lexer_tests
-  tests/lexer/lexer_tests.cpp
+  lexer/lexer_tests.cpp
 )
 
 target_link_libraries(lexer_tests PRIVATE gtest_main rustcc_lib)

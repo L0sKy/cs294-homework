@@ -25,7 +25,10 @@ file(GLOB_RECURSE RUSTCC_HEADERS CONFIGURE_DEPENDS
   include/*.hpp
 )
 
-add_library(rustcc_lib ${RUSTCC_SOURCES} ${RUSTCC_HEADERS})
+set(RUSTCC_LIB_SOURCES ${RUSTCC_SOURCES})
+list(REMOVE_ITEM RUSTCC_LIB_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+add_library(rustcc_lib ${RUSTCC_LIB_SOURCES} ${RUSTCC_HEADERS})
 target_include_directories(rustcc_lib PUBLIC include)
 
 add_executable(rustcc ${RUSTCC_SOURCES} ${RUSTCC_HEADERS})
