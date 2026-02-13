@@ -41,4 +41,5 @@ When you are asked to make a plan, such a plan should follow these rules:
         - If you did not do it, do it now, and re-stage-and-commit it.
    - Stage and commit this summary document.
 
+ALL plans should be written in English.
 DO NOT make any modifications to this project yet! Put this plan in `docs/plans/`.
