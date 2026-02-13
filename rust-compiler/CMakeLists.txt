@@ -14,15 +14,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(argparse)
 
-if(BUILD_TESTING)
-  FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG release-1.12.1
-  )
-  FetchContent_MakeAvailable(googletest)
-endif()
-
 file(GLOB_RECURSE RUSTCC_SOURCES CONFIGURE_DEPENDS
   src/*.c
   src/*.cc
@@ -34,10 +25,15 @@ file(GLOB_RECURSE RUSTCC_HEADERS CONFIGURE_DEPENDS
   include/*.hpp
 )
 
+add_library(rustcc_lib ${RUSTCC_SOURCES} ${RUSTCC_HEADERS})
+target_include_directories(rustcc_lib PUBLIC include)
+
 add_executable(rustcc ${RUSTCC_SOURCES} ${RUSTCC_HEADERS})
 
-target_include_directories(rustcc PRIVATE include)
-
-target_link_libraries(rustcc PRIVATE argparse::argparse)
+target_link_libraries(rustcc PRIVATE rustcc_lib argparse::argparse)
 
 include(CTest)
+
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
