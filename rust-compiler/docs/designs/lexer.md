@@ -54,6 +54,10 @@ If a token is not supported or malformed (e.g. unterminated string/char),
 the lexer should emit an `Unknown` token with the consumed text and report
 error in terminal. The lexer should continue tokenization afterward.
 
+The lexer should expose an error query API (for example `bool had_error() const`)
+that returns true if any error was reported during tokenization. `main` uses
+this to decide whether to exit with a non-zero status after tokenization.
+
 ## Data structure
 
 This section will tell the data structures which will be used.
@@ -64,6 +68,7 @@ class Lexer {
     public:
         Lexer(std::istream& input); // file descriptor
         std::vector<Token> tokenize(); // core function to get tokens
+        bool had_error() const; // whether any error was reported
     private:
         bool hasNext(); // more tokens?
         Token nextToken(); // get next token

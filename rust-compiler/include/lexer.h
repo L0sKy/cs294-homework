@@ -39,7 +39,9 @@ class Lexer {
   explicit Lexer(std::istream& input);
 
   std::vector<Token> tokenize();
+  bool had_error() const;
 
  private:
   std::istream& input_;
+  bool had_error_ = false;
 };

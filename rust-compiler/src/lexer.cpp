@@ -35,6 +35,8 @@ class LexerImpl {
     return tokens;
   }
 
+  bool had_error() const { return had_error_; }
+
  private:
   bool IsAtEnd() const { return index_ >= input_.size(); }
 
@@ -69,7 +71,8 @@ class LexerImpl {
     return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_';
   }
 
-  void ReportError(const std::string& message, size_t line, size_t col) const {
+  void ReportError(const std::string& message, size_t line, size_t col) {
+    had_error_ = true;
     std::cerr << "Lexer error at " << line << ":" << col << ": " << message << '\n';
   }
 
@@ -261,6 +264,7 @@ class LexerImpl {
   size_t index_ = 0;
   size_t line_ = 1;
   size_t col_ = 1;
+  bool had_error_ = false;
 };
 
 }  // namespace
@@ -276,6 +280,7 @@ size_t Token::col() const { return col_; }
 Lexer::Lexer(std::istream& input) : input_(input) {}
 
 std::vector<Token> Lexer::tokenize() {
+  had_error_ = false;
   std::string buffer;
   input_.seekg(0, std::ios::end);
   std::streamoff size = input_.tellg();
@@ -290,5 +295,9 @@ std::vector<Token> Lexer::tokenize() {
   }
 
   LexerImpl impl(std::move(buffer));
-  return impl.Tokenize();
+  std::vector<Token> tokens = impl.Tokenize();
+  had_error_ = impl.had_error();
+  return tokens;
 }
+
+bool Lexer::had_error() const { return had_error_; }

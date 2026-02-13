@@ -14,6 +14,13 @@ std::vector<Token> Tokenize(const std::string& input) {
   return lexer.tokenize();
 }
 
+bool HadError(const std::string& input) {
+  std::istringstream stream(input);
+  Lexer lexer(stream);
+  (void)lexer.tokenize();
+  return lexer.had_error();
+}
+
 void ExpectToken(const Token& token, TokenType type, const std::string& value, size_t line,
                  size_t col) {
   EXPECT_EQ(token.type(), type);
@@ -132,4 +139,14 @@ TEST(LexerUnknown, ReportsUnknownTokens) {
 
   ExpectToken(tokens[0], TokenType::Unknown, "@", 1, 1);
   EXPECT_EQ(tokens.back().type(), TokenType::Eof);
+}
+
+TEST(LexerErrorState, IsFalseForValidInput) { EXPECT_FALSE(HadError("fn main() {}")); }
+
+TEST(LexerErrorState, IsTrueForUnknownToken) { EXPECT_TRUE(HadError("@")); }
+
+TEST(LexerErrorState, IsTrueForUnterminatedString) { EXPECT_TRUE(HadError("\"abc")); }
+
+TEST(LexerErrorState, IsTrueForUnterminatedBlockComment) {
+  EXPECT_TRUE(HadError("/* unterminated"));
 }

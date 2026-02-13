@@ -9,18 +9,29 @@ main.cpp only contain one function: int main(); this function is the entry of th
 main() use argparse to process arguments.
 
 It support these args:
---file: this arg will give a file path, which is the source code of the input rust source file.
---help: this arg will output all args usage.
---lexer: this arg will output the lexer result.
+- `--file` / `-f`: the input Rust source file path. This is required unless a single
+  positional argument is provided.
+- `--help` / `-h`: output all args usage. Default `false`.
+- `--lexer`: output the lexer result. Default `false`.
+
+Positional arguments:
+- Exactly one positional argument is allowed and it is treated as the input file
+  when `-f` / `--file` is not provided.
+- Multiple positional arguments are an error.
 
 When `--lexer` is provided, output tokens one per line with the format:
 `TYPE value line col`, including the EOF token.
+
+If the lexer reports a bug, `main` should terminate immediately after tokenization.
+If `--lexer` is set, termination happens after output.
 
 ## Interface
 ```cpp
 int main(){
     argparse::ArgumentParser args("rustcompiler");
-    args.add_argument("--file"); //add all args for argparse
+    args.add_argument("-f", "--file"); //add all args for argparse
+    args.add_argument("-h", "--help").default_value(false).implicit_value(true);
+    args.add_argument("--lexer").default_value(false).implicit_value(true);
     ...
     if (args.get<bool>("--help")) //if has --help, output args
     ...
@@ -29,6 +40,8 @@ int main(){
     std::vector<Token> tokens = lexer.tokenizer();
     ...
     if (args.get<bool>("--lexer")) //if has --lexer, output tokens
+    ...
+    if (lexer.had_error()) //terminate immediately after tokenization
     ...
     return 0;
 }
