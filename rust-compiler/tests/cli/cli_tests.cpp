@@ -93,6 +93,18 @@ TEST(MainCliHelp, PrintsHelpAndExitsZero) {
   EXPECT_NE(result.stdout_text.find("--file"), std::string::npos);
 }
 
+TEST(MainCliHelp, IgnoresOtherArgsWhenHelpProvided) {
+  const std::filesystem::path file_path = WriteRustFile("fn main() {}\n");
+  const CommandResult result =
+      RunRustcc({"-h", "-f", file_path.string(), "--lexer"});
+  EXPECT_EQ(result.exit_code, 0);
+  EXPECT_NE(result.stdout_text.find("--file"), std::string::npos);
+  EXPECT_EQ(result.stderr_text, "");
+
+  std::error_code ec;
+  std::filesystem::remove(file_path, ec);
+}
+
 TEST(MainCliInput, FailsWhenNoInputIsProvided) {
   const CommandResult result = RunRustcc({});
   EXPECT_EQ(result.exit_code, 1);
@@ -108,10 +120,20 @@ TEST(MainCliInput, UsesSinglePositionalAsFile) {
   std::filesystem::remove(file_path, ec);
 }
 
+TEST(MainCliInput, AcceptsOptionsAfterPositional) {
+  const std::filesystem::path file_path = WriteRustFile("@\n");
+  const CommandResult result = RunRustcc({file_path.string(), "--lexer"});
+  EXPECT_EQ(result.exit_code, 1);
+  EXPECT_NE(result.stdout_text.find("Unknown @ 1 1"), std::string::npos);
+
+  std::error_code ec;
+  std::filesystem::remove(file_path, ec);
+}
+
 TEST(MainCliInput, FailsForMultiplePositionals) {
   const CommandResult result = RunRustcc({"a.rs", "b.rs"});
   EXPECT_EQ(result.exit_code, 1);
-  EXPECT_NE(result.stderr_text.find("Only one positional input file is allowed."),
+  EXPECT_NE(result.stderr_text.find("Maximum number of positional arguments exceeded"),
             std::string::npos);
 }
 

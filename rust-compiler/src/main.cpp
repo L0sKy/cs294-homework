@@ -50,7 +50,15 @@ int main(int argc, char** argv) {
       .help("Show this help message and exit.")
       .default_value(false)
       .implicit_value(true);
-  args.add_argument("input").remaining();
+  args.add_argument("input").nargs(0, 1);
+
+  for (int i = 1; i < argc; ++i) {
+    const std::string arg(argv[i]);
+    if (arg == "-h" || arg == "--help") {
+      std::cout << args;
+      return 0;
+    }
+  }
 
   try {
     args.parse_args(argc, argv);
@@ -58,11 +66,6 @@ int main(int argc, char** argv) {
     std::cerr << ex.what() << '\n';
     std::cerr << args;
     return 1;
-  }
-
-  if (args.get<bool>("--help")) {
-    std::cout << args;
-    return 0;
   }
 
   const std::vector<std::string> positional_inputs =
