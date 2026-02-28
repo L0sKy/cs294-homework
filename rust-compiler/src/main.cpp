@@ -6,6 +6,7 @@
 #include <argparse/argparse.hpp>
 
 #include "lexer.h"
+#include "parser.h"
 
 namespace {
 
@@ -44,6 +45,10 @@ int main(int argc, char** argv) {
       .default_value(std::string(""));
   args.add_argument("--lexer")
       .help("Output lexer tokens in the format: TYPE value line col.")
+      .default_value(false)
+      .implicit_value(true);
+  args.add_argument("--parser")
+      .help("Output parser AST dump in a clang-like format.")
       .default_value(false)
       .implicit_value(true);
   args.add_argument("-h", "--help")
@@ -101,6 +106,7 @@ int main(int argc, char** argv) {
   std::vector<Token> tokens = lexer.tokenize();
 
   const bool show_lexer = args.get<bool>("--lexer");
+  const bool show_parser = args.get<bool>("--parser");
   if (show_lexer) {
     for (const auto& token : tokens) {
       std::cout << TokenTypeToString(token.type()) << ' ' << token.value() << ' '
@@ -108,7 +114,17 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (lexer.had_error()) {
+  bool parser_had_error = false;
+  if (show_parser) {
+    Parser parser(std::move(tokens));
+    std::unique_ptr<Program> program = parser.parse_program();
+    parser_had_error = parser.had_error();
+    if (program) {
+      program->dump(std::cout, DumpPrefix::Root());
+    }
+  }
+
+  if (lexer.had_error() || parser_had_error) {
     return 1;
   }
 

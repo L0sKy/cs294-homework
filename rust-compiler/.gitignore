@@ -1,2 +1,5 @@
 build/*
 Testing/*
+docs/reference/*
+*/.DS_Store
+.DS_Store
