@@ -100,3 +100,25 @@ TEST(IntegrationLexer, UnknownTokenMatchesGolden) {
   EXPECT_EQ(result.stdout_text, ReadFile(expected_out));
   EXPECT_EQ(result.stderr_text, ReadFile(expected_err));
 }
+
+TEST(IntegrationParser, ParserOutputMatchesGolden) {
+  const std::filesystem::path input_path = FixturePath("parser_ok.rs");
+  const std::filesystem::path expected_out = FixturePath("parser_ok.out");
+  const std::filesystem::path expected_err = FixturePath("parser_ok.err");
+
+  const CommandResult result = RunRustcc({"--parser", "-f", input_path.string()});
+  EXPECT_EQ(result.exit_code, 0);
+  EXPECT_EQ(result.stdout_text, ReadFile(expected_out));
+  EXPECT_EQ(result.stderr_text, ReadFile(expected_err));
+}
+
+TEST(IntegrationParser, ParserErrorMatchesGolden) {
+  const std::filesystem::path input_path = FixturePath("parser_err.rs");
+  const std::filesystem::path expected_out = FixturePath("parser_err.out");
+  const std::filesystem::path expected_err = FixturePath("parser_err.err");
+
+  const CommandResult result = RunRustcc({"--parser", "-f", input_path.string()});
+  EXPECT_NE(result.exit_code, 0);
+  EXPECT_EQ(result.stdout_text, ReadFile(expected_out));
+  EXPECT_EQ(result.stderr_text, ReadFile(expected_err));
+}

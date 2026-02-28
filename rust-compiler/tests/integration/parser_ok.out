@@ -1,0 +1,9 @@
+TranslationUnitDecl
+`-FunctionDecl <1:1> add
+  |-ParmVarDecl <1:8> x : i32
+  |-ParmVarDecl <1:16> y : i32
+  `-CompoundStmt <1:24>
+    `-ReturnStmt <1:26>
+      `-BinaryOperator '+' <1:35>
+        |-DeclRefExpr <1:33> x
+        `-DeclRefExpr <1:37> y
