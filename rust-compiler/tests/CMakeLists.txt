@@ -15,6 +15,14 @@ target_link_libraries(lexer_tests PRIVATE gtest_main rustcc_lib)
 
 target_include_directories(lexer_tests PRIVATE include)
 
+add_executable(parser_tests
+  parser/parser_tests.cpp
+)
+
+target_link_libraries(parser_tests PRIVATE gtest_main rustcc_lib)
+
+target_include_directories(parser_tests PRIVATE include)
+
 add_executable(cli_tests
   cli/cli_tests.cpp
 )
@@ -34,5 +42,6 @@ add_dependencies(integration_tests rustcc)
 include(GoogleTest)
 
 gtest_discover_tests(lexer_tests PROPERTIES LABELS unit)
+gtest_discover_tests(parser_tests PROPERTIES LABELS unit)
 gtest_discover_tests(cli_tests PROPERTIES LABELS cli)
 gtest_discover_tests(integration_tests PROPERTIES LABELS integration)
