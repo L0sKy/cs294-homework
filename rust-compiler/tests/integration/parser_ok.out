@@ -1,9 +1,25 @@
 TranslationUnitDecl
-`-FunctionDecl <1:1> add
-  |-ParmVarDecl <1:8> x : i32
-  |-ParmVarDecl <1:16> y : i32
-  `-CompoundStmt <1:24>
-    `-ReturnStmt <1:26>
-      `-BinaryOperator '+' <1:35>
-        |-DeclRefExpr <1:33> x
-        `-DeclRefExpr <1:37> y
+`-FunctionDecl <1:1> main
+  `-CompoundStmt <1:11>
+    |-LetStmt <1:13> mut x
+    | `-IntegerLiteral <1:25> 42
+    |-LetStmt <1:29> ok
+    | `-BooleanLiteral <1:38> true
+    |-LetStmt <1:44> y
+    | `-StringLiteral <1:52> "hi"
+    |-LetStmt <1:58> z
+    | `-CharLiteral <1:66> 'a'
+    |-IfStmt <1:71>
+    | |-BinaryOperator '>=' <1:76>
+    | | |-DeclRefExpr <1:74> x
+    | | `-IntegerLiteral <1:79> 10
+    | |-CompoundStmt <1:82>
+    | | `-ReturnStmt <1:84>
+    | `-CompoundStmt <1:99>
+    |   `-ExprStmt <1:101>
+    |     `-AssignExpr '=' <1:103>
+    |       |-DeclRefExpr <1:101> x
+    |       `-BinaryOperator '-' <1:107>
+    |         |-DeclRefExpr <1:105> x
+    |         `-IntegerLiteral <1:109> 1
+    `-ReturnStmt <1:115>
