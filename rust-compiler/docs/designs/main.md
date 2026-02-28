@@ -13,6 +13,7 @@ It support these args:
   positional argument is provided.
 - `--help` / `-h`: output all args usage. Default `false`.
 - `--lexer`: output the lexer result. Default `false`.
+- `--parser`: output the parser AST dump. Default `false`.
 
 Positional arguments:
 - Exactly one positional argument is allowed and it is treated as the input file
@@ -24,6 +25,10 @@ When `--lexer` is provided, output tokens one per line with the format:
 
 If the lexer reports a bug, `main` should terminate immediately after tokenization.
 If `--lexer` is set, termination happens after output.
+
+When `--parser` is provided, output a clang-like AST dump. This calls the AST
+`dump()` method starting from the root node and prints a tree with `|-` and ``-`
+connectors. Child nodes are always more indented than their parent.
 
 ## Interface
 ```cpp
