@@ -25,16 +25,23 @@ argument             := identifier ":" identifier
 compound_statement   := "{" statement_list? "}"
 statement_list       := statement (";" statement)*
 
-statement            := return_stmt
+statement            := let_stmt
+                      | if_stmt
+                      | return_stmt
                       | while_stmt
                       | compound_statement
                       | expr_stmt
+
+let_stmt             := "let" "mut"? identifier (":" identifier)? "=" expression
+if_stmt              := "if" expression compound_statement ("else" (if_stmt | compound_statement))?
 
 return_stmt          := "return" expression?
 while_stmt           := "while" expression compound_statement
 expr_stmt            := expression
 
-expression           := equality
+expression           := assignment
+
+assignment           := equality ( "=" assignment )?
 
 equality             := comparison ( ("==" | "!=") comparison )*
 comparison           := term ( ("<" | ">" | "<=" | ">=") term )*
@@ -83,6 +90,23 @@ struct Stmt : ASTNode {};
 
 struct CompoundStmt : Stmt {
   std::vector<std::unique_ptr<Stmt>> statements;
+  size_t line;
+  size_t col;
+};
+
+struct LetStmt : Stmt {
+  std::string name;
+  bool is_mutable;
+  std::string type_name;  // empty if not specified
+  std::unique_ptr<Expr> initializer;
+  size_t line;
+  size_t col;
+};
+
+struct IfStmt : Stmt {
+  std::unique_ptr<Expr> condition;
+  std::unique_ptr<CompoundStmt> then_branch;
+  std::unique_ptr<Stmt> else_branch;  // may be nullptr
   size_t line;
   size_t col;
 };
@@ -140,6 +164,13 @@ struct ParenExpr : Expr {
   size_t line;
   size_t col;
 };
+
+struct AssignExpr : Expr {
+  std::unique_ptr<Expr> lhs;
+  std::unique_ptr<Expr> rhs;
+  size_t line;
+  size_t col;
+};
 ```
 
 ## Parser API
@@ -166,11 +197,14 @@ class Parser {
   std::unique_ptr<CompoundStmt> parse_compound_statement();
   std::vector<std::unique_ptr<Stmt>> parse_statement_list();
   std::unique_ptr<Stmt> parse_statement();
+  std::unique_ptr<Stmt> parse_let_stmt();
+  std::unique_ptr<Stmt> parse_if_stmt();
   std::unique_ptr<Stmt> parse_return_stmt();
   std::unique_ptr<Stmt> parse_while_stmt();
   std::unique_ptr<Stmt> parse_expr_stmt();
 
   std::unique_ptr<Expr> parse_expression();
+  std::unique_ptr<Expr> parse_assignment();
   std::unique_ptr<Expr> parse_equality();
   std::unique_ptr<Expr> parse_comparison();
   std::unique_ptr<Expr> parse_term();
