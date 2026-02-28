@@ -5,6 +5,7 @@
 - Added parser unit tests and integration tests, including error-case fixtures.
 - Added `--parser` CLI flag to print AST dump and exit non-zero on parser errors.
 - Extended parser with `let`, `if/else` (including `else if`), and assignment support.
+- Added a follow-up plan document for parser extensions.
 
 ## 1) Action items completed
 - [x] Added parser design documentation.
@@ -36,6 +37,8 @@
 - Extended AST and parser:
   - `LetStmt`, `IfStmt`, and `AssignExpr` AST nodes.
   - Assignment parsing and `else if` handling.
+- Added plan document:
+  - `docs/plans/PLAN-parser-extensions.md`
 
 ## 3) Technical decisions and notes
 - AST dump uses virtual `dump()` on subclasses and a shared prefix helper to match
