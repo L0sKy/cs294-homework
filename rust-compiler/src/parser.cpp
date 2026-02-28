@@ -145,6 +145,12 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse_statement_list() {
 }
 
 std::unique_ptr<Stmt> Parser::parse_statement() {
+  if (IsKeyword(peek(), "let")) {
+    return parse_let_stmt();
+  }
+  if (IsKeyword(peek(), "if")) {
+    return parse_if_stmt();
+  }
   if (IsKeyword(peek(), "return")) {
     return parse_return_stmt();
   }
@@ -155,6 +161,42 @@ std::unique_ptr<Stmt> Parser::parse_statement() {
     return parse_compound_statement();
   }
   return parse_expr_stmt();
+}
+
+std::unique_ptr<Stmt> Parser::parse_let_stmt() {
+  const Token& kw = expect(TokenType::Keyword, "expected 'let'", "let");
+  bool is_mutable = false;
+  if (IsKeyword(peek(), "mut")) {
+    advance();
+    is_mutable = true;
+  }
+  const Token& name = expect(TokenType::Identifier, "expected identifier");
+  std::string type_name;
+  if (match(TokenType::Punctuation, ":")) {
+    const Token& type_token = expect(TokenType::Identifier, "expected type name");
+    type_name = type_token.value();
+  }
+  expect(TokenType::Operator, "expected '='", "=");
+  std::unique_ptr<Expr> init = parse_expression();
+  return std::make_unique<LetStmt>(name.value(), is_mutable, type_name, std::move(init),
+                                   kw.line(), kw.col());
+}
+
+std::unique_ptr<Stmt> Parser::parse_if_stmt() {
+  const Token& kw = expect(TokenType::Keyword, "expected 'if'", "if");
+  std::unique_ptr<Expr> condition = parse_expression();
+  std::unique_ptr<CompoundStmt> then_branch = parse_compound_statement();
+  std::unique_ptr<Stmt> else_branch;
+  if (IsKeyword(peek(), "else")) {
+    advance();
+    if (IsKeyword(peek(), "if")) {
+      else_branch = parse_if_stmt();
+    } else {
+      else_branch = parse_compound_statement();
+    }
+  }
+  return std::make_unique<IfStmt>(std::move(condition), std::move(then_branch),
+                                  std::move(else_branch), kw.line(), kw.col());
 }
 
 std::unique_ptr<Stmt> Parser::parse_return_stmt() {
@@ -179,7 +221,17 @@ std::unique_ptr<Stmt> Parser::parse_expr_stmt() {
   return std::make_unique<ExprStmt>(std::move(expr), token.line(), token.col());
 }
 
-std::unique_ptr<Expr> Parser::parse_expression() { return parse_equality(); }
+std::unique_ptr<Expr> Parser::parse_expression() { return parse_assignment(); }
+
+std::unique_ptr<Expr> Parser::parse_assignment() {
+  std::unique_ptr<Expr> expr = parse_equality();
+  if (IsOperatorToken(peek(), {"="})) {
+    const Token& op = advance();
+    std::unique_ptr<Expr> rhs = parse_assignment();
+    return std::make_unique<AssignExpr>(std::move(expr), std::move(rhs), op.line(), op.col());
+  }
+  return expr;
+}
 
 std::unique_ptr<Expr> Parser::parse_equality() {
   std::unique_ptr<Expr> expr = parse_comparison();
@@ -257,17 +309,25 @@ std::unique_ptr<Expr> Parser::parse_primary() {
 }
 
 void Parser::synchronize() {
+  bool advanced = false;
   while (!is_at_end()) {
     if (match(TokenType::Punctuation, ";")) {
       return;
     }
     if (IsPunct(peek(), "}")) {
+      if (!advanced) {
+        advance();
+      }
       return;
     }
     if (IsKeyword(peek(), "fn")) {
+      if (!advanced) {
+        advance();
+      }
       return;
     }
     advance();
+    advanced = true;
   }
 }
 

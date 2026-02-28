@@ -67,6 +67,40 @@ struct CompoundStmt : Stmt {
   void dump(std::ostream& out, const DumpPrefix& prefix) const override;
 };
 
+struct LetStmt : Stmt {
+  std::string name;
+  bool is_mutable = false;
+  std::string type_name;
+  std::unique_ptr<Expr> initializer;
+  size_t line = 0;
+  size_t col = 0;
+
+  LetStmt(std::string name,
+          bool is_mutable,
+          std::string type_name,
+          std::unique_ptr<Expr> initializer,
+          size_t line,
+          size_t col);
+
+  void dump(std::ostream& out, const DumpPrefix& prefix) const override;
+};
+
+struct IfStmt : Stmt {
+  std::unique_ptr<Expr> condition;
+  std::unique_ptr<CompoundStmt> then_branch;
+  std::unique_ptr<Stmt> else_branch;
+  size_t line = 0;
+  size_t col = 0;
+
+  IfStmt(std::unique_ptr<Expr> condition,
+         std::unique_ptr<CompoundStmt> then_branch,
+         std::unique_ptr<Stmt> else_branch,
+         size_t line,
+         size_t col);
+
+  void dump(std::ostream& out, const DumpPrefix& prefix) const override;
+};
+
 struct ReturnStmt : Stmt {
   std::unique_ptr<Expr> value;
   size_t line = 0;
@@ -154,6 +188,17 @@ struct ParenExpr : Expr {
   size_t col = 0;
 
   ParenExpr(std::unique_ptr<Expr> expr, size_t line, size_t col);
+
+  void dump(std::ostream& out, const DumpPrefix& prefix) const override;
+};
+
+struct AssignExpr : Expr {
+  std::unique_ptr<Expr> lhs;
+  std::unique_ptr<Expr> rhs;
+  size_t line = 0;
+  size_t col = 0;
+
+  AssignExpr(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs, size_t line, size_t col);
 
   void dump(std::ostream& out, const DumpPrefix& prefix) const override;
 };

@@ -4,6 +4,7 @@
 - Implemented recursive-descent parser and AST dump with clang-like tree output.
 - Added parser unit tests and integration tests, including error-case fixtures.
 - Added `--parser` CLI flag to print AST dump and exit non-zero on parser errors.
+- Extended parser with `let`, `if/else` (including `else if`), and assignment support.
 
 ## 1) Action items completed
 - [x] Added parser design documentation.
@@ -12,6 +13,7 @@
 - [x] Implemented AST dump as subclass methods.
 - [x] Implemented parser and `--parser` CLI support.
 - [x] Ran unit and integration tests.
+- [x] Added `let`, `if/else`, and assignment parsing and tests.
 
 ## 2) Changes made
 - New AST and parser implementation:
@@ -31,6 +33,9 @@
   - `tests/CMakeLists.txt` adds `parser_tests`
 - Repo hygiene:
   - `.gitignore` updated to ignore reference docs and `.DS_Store`.
+- Extended AST and parser:
+  - `LetStmt`, `IfStmt`, and `AssignExpr` AST nodes.
+  - Assignment parsing and `else if` handling.
 
 ## 3) Technical decisions and notes
 - AST dump uses virtual `dump()` on subclasses and a shared prefix helper to match
@@ -39,6 +44,8 @@
   keeping later declarations parsable.
 - `--parser` always dumps the current AST (even when errors exist) and then exits
   non-zero if parser errors were recorded.
+- Assignment is parsed as a right-associative expression node and emitted as
+  `AssignExpr '='` in the dump for clarity.
 
 ## 4) Tests
 - `cmake -S . -B build -DBUILD_TESTING=ON`

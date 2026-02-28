@@ -32,11 +32,14 @@ class Parser {
   std::unique_ptr<CompoundStmt> parse_compound_statement();
   std::vector<std::unique_ptr<Stmt>> parse_statement_list();
   std::unique_ptr<Stmt> parse_statement();
+  std::unique_ptr<Stmt> parse_let_stmt();
+  std::unique_ptr<Stmt> parse_if_stmt();
   std::unique_ptr<Stmt> parse_return_stmt();
   std::unique_ptr<Stmt> parse_while_stmt();
   std::unique_ptr<Stmt> parse_expr_stmt();
 
   std::unique_ptr<Expr> parse_expression();
+  std::unique_ptr<Expr> parse_assignment();
   std::unique_ptr<Expr> parse_equality();
   std::unique_ptr<Expr> parse_comparison();
   std::unique_ptr<Expr> parse_term();

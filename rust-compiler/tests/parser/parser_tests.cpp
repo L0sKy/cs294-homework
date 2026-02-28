@@ -65,11 +65,11 @@ TEST(ParserStatements, WhileAndExpr) {
 
 TEST(ParserStatements, LetAndIfElse) {
   const char* input =
-      "fn main(x: i32) {\\n"
-      "  let mut x = 1;\\n"
-      "  let y: i32 = x + 1;\\n"
-      "  if x > 0 { return; } else if x < 0 { return x; } else { x = x - 1; };\\n"
-      "}\\n";
+      "fn main(x: i32) {\n"
+      "  let mut x = 1;\n"
+      "  let y: i32 = x + 1;\n"
+      "  if x > 0 { return; } else if x < 0 { return x; } else { x = x - 1; };\n"
+      "}\n";
   bool had_error = false;
   std::unique_ptr<Program> program = ParseProgram(input, &had_error);
   ASSERT_TRUE(program);

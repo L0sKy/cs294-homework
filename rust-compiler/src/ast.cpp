@@ -65,6 +65,30 @@ CompoundStmt::CompoundStmt(std::vector<std::unique_ptr<Stmt>> statements,
                            size_t col)
     : statements(std::move(statements)), line(line), col(col) {}
 
+LetStmt::LetStmt(std::string name,
+                 bool is_mutable,
+                 std::string type_name,
+                 std::unique_ptr<Expr> initializer,
+                 size_t line,
+                 size_t col)
+    : name(std::move(name)),
+      is_mutable(is_mutable),
+      type_name(std::move(type_name)),
+      initializer(std::move(initializer)),
+      line(line),
+      col(col) {}
+
+IfStmt::IfStmt(std::unique_ptr<Expr> condition,
+               std::unique_ptr<CompoundStmt> then_branch,
+               std::unique_ptr<Stmt> else_branch,
+               size_t line,
+               size_t col)
+    : condition(std::move(condition)),
+      then_branch(std::move(then_branch)),
+      else_branch(std::move(else_branch)),
+      line(line),
+      col(col) {}
+
 ReturnStmt::ReturnStmt(std::unique_ptr<Expr> value, size_t line, size_t col)
     : value(std::move(value)), line(line), col(col) {}
 
@@ -95,6 +119,9 @@ IdentExpr::IdentExpr(std::string name, size_t line, size_t col)
 
 ParenExpr::ParenExpr(std::unique_ptr<Expr> expr, size_t line, size_t col)
     : expr(std::move(expr)), line(line), col(col) {}
+
+AssignExpr::AssignExpr(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs, size_t line, size_t col)
+    : lhs(std::move(lhs)), rhs(std::move(rhs)), line(line), col(col) {}
 
 void Program::dump(std::ostream& out, const DumpPrefix& prefix) const {
   DumpLine(out, prefix, "TranslationUnitDecl");
@@ -133,6 +160,52 @@ void CompoundStmt::dump(std::ostream& out, const DumpPrefix& prefix) const {
   for (size_t i = 0; i < statements.size(); ++i) {
     const bool is_last = (i + 1 == statements.size());
     statements[i]->dump(out, ChildPrefix(prefix, is_last));
+  }
+}
+
+void LetStmt::dump(std::ostream& out, const DumpPrefix& prefix) const {
+  std::string label = "LetStmt " + FormatLocation(line, col) + " ";
+  if (is_mutable) {
+    label += "mut ";
+  }
+  label += name;
+  if (!type_name.empty()) {
+    label += " : " + type_name;
+  }
+  DumpLine(out, prefix, label);
+  if (initializer) {
+    initializer->dump(out, ChildPrefix(prefix, true));
+  }
+}
+
+void IfStmt::dump(std::ostream& out, const DumpPrefix& prefix) const {
+  const std::string label = "IfStmt " + FormatLocation(line, col);
+  DumpLine(out, prefix, label);
+  size_t total_children = 0;
+  if (condition) {
+    ++total_children;
+  }
+  if (then_branch) {
+    ++total_children;
+  }
+  if (else_branch) {
+    ++total_children;
+  }
+
+  size_t index = 0;
+  if (condition) {
+    const bool is_last = (index + 1 == total_children);
+    condition->dump(out, ChildPrefix(prefix, is_last));
+    ++index;
+  }
+  if (then_branch) {
+    const bool is_last = (index + 1 == total_children);
+    then_branch->dump(out, ChildPrefix(prefix, is_last));
+    ++index;
+  }
+  if (else_branch) {
+    const bool is_last = (index + 1 == total_children);
+    else_branch->dump(out, ChildPrefix(prefix, is_last));
   }
 }
 
@@ -202,5 +275,18 @@ void ParenExpr::dump(std::ostream& out, const DumpPrefix& prefix) const {
   DumpLine(out, prefix, label);
   if (expr) {
     expr->dump(out, ChildPrefix(prefix, true));
+  }
+}
+
+void AssignExpr::dump(std::ostream& out, const DumpPrefix& prefix) const {
+  const std::string label = "AssignExpr '=' " + FormatLocation(line, col);
+  DumpLine(out, prefix, label);
+  if (lhs && rhs) {
+    lhs->dump(out, ChildPrefix(prefix, false));
+    rhs->dump(out, ChildPrefix(prefix, true));
+  } else if (lhs) {
+    lhs->dump(out, ChildPrefix(prefix, true));
+  } else if (rhs) {
+    rhs->dump(out, ChildPrefix(prefix, true));
   }
 }
