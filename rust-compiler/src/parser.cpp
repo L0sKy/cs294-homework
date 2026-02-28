@@ -134,12 +134,30 @@ std::unique_ptr<CompoundStmt> Parser::parse_compound_statement() {
 
 std::vector<std::unique_ptr<Stmt>> Parser::parse_statement_list() {
   std::vector<std::unique_ptr<Stmt>> statements;
-  statements.push_back(parse_statement());
-  while (match(TokenType::Punctuation, ";")) {
+  bool needs_semicolon = false;
+  while (!IsPunct(peek(), "}") && !is_at_end()) {
+    const Token& start = peek();
+    std::unique_ptr<Stmt> stmt = parse_statement();
+    bool is_block = false;
+    if (IsKeyword(start, "if") || IsKeyword(start, "while") || IsPunct(start, "{")) {
+      is_block = true;
+    }
+    statements.push_back(std::move(stmt));
+
     if (IsPunct(peek(), "}")) {
       break;
     }
-    statements.push_back(parse_statement());
+    if (is_block) {
+      match(TokenType::Punctuation, ";");
+      continue;
+    }
+    if (!match(TokenType::Punctuation, ";")) {
+      report_error(peek(), "expected ';'");
+      synchronize();
+      if (IsPunct(peek(), "}")) {
+        break;
+      }
+    }
   }
   return statements;
 }

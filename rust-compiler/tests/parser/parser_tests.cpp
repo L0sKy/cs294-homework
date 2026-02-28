@@ -76,6 +76,20 @@ TEST(ParserStatements, LetAndIfElse) {
   EXPECT_FALSE(had_error);
 }
 
+TEST(ParserStatements, BlockWithoutSemicolon) {
+  const char* input =
+      "fn main() {\n"
+      "  if true { return; }\n"
+      "  while true { return; }\n"
+      "  { return; }\n"
+      "  return;\n"
+      "}\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_FALSE(had_error);
+}
+
 TEST(ParserExpressions, Assignment) {
   const char* input = "fn main(x: i32) { x = x - 1; }";
   bool had_error = false;

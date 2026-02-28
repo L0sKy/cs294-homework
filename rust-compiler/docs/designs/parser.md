@@ -23,7 +23,9 @@ argument_list        := argument ("," argument)*
 argument             := identifier ":" identifier
 
 compound_statement   := "{" statement_list? "}"
-statement_list       := statement (";" statement)*
+statement_list       := statement (statement_sep statement)*
+statement_sep        := ";"
+                     | <implicit>  // allowed after block statements
 
 statement            := let_stmt
                       | if_stmt
