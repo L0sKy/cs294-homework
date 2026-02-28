@@ -1,1 +1,2 @@
-Parser error at 1:1: expected declaration
+Parser error at 2:9: expected 'in'
+Parser error at 3:16: expected ']'

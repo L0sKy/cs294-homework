@@ -11,7 +11,7 @@ The parser consumes lexer tokens and constructs an AST (Abstract Syntax Tree).
 
 ## Grammar Subset
 
-This phase does not include `for` loops or array indexing.
+This phase includes `for` loops and array indexing.
 
 ```ebnf
 program             := decl* EOF
@@ -28,6 +28,7 @@ statement_sep        := ";"
                      | <implicit>  // allowed after block statements
 
 statement            := let_stmt
+                      | for_stmt
                       | if_stmt
                       | return_stmt
                       | while_stmt
@@ -35,6 +36,7 @@ statement            := let_stmt
                       | expr_stmt
 
 let_stmt             := "let" "mut"? identifier (":" identifier)? "=" expression
+for_stmt             := "for" identifier "in" expression compound_statement
 if_stmt              := "if" expression compound_statement ("else" (if_stmt | compound_statement))?
 
 return_stmt          := "return" expression?
@@ -49,7 +51,8 @@ equality             := comparison ( ("==" | "!=") comparison )*
 comparison           := term ( ("<" | ">" | "<=" | ">=") term )*
 term                 := factor ( ("+" | "-") factor )*
 factor               := unary ( ("*" | "/") unary )*
-unary                := ("+" | "-") unary | primary
+unary                := ("+" | "-") unary | postfix
+postfix              := primary ("[" expression "]")*
 primary              := identifier
                       | literal
                       | "(" expression ")"
@@ -109,6 +112,14 @@ struct IfStmt : Stmt {
   std::unique_ptr<Expr> condition;
   std::unique_ptr<CompoundStmt> then_branch;
   std::unique_ptr<Stmt> else_branch;  // may be nullptr
+  size_t line;
+  size_t col;
+};
+
+struct ForStmt : Stmt {
+  std::string name;
+  std::unique_ptr<Expr> iterable;
+  std::unique_ptr<CompoundStmt> body;
   size_t line;
   size_t col;
 };
@@ -173,6 +184,13 @@ struct AssignExpr : Expr {
   size_t line;
   size_t col;
 };
+
+struct IndexExpr : Expr {
+  std::unique_ptr<Expr> target;
+  std::unique_ptr<Expr> index;
+  size_t line;
+  size_t col;
+};
 ```
 
 ## Parser API
@@ -200,6 +218,7 @@ class Parser {
   std::vector<std::unique_ptr<Stmt>> parse_statement_list();
   std::unique_ptr<Stmt> parse_statement();
   std::unique_ptr<Stmt> parse_let_stmt();
+  std::unique_ptr<Stmt> parse_for_stmt();
   std::unique_ptr<Stmt> parse_if_stmt();
   std::unique_ptr<Stmt> parse_return_stmt();
   std::unique_ptr<Stmt> parse_while_stmt();
@@ -212,6 +231,7 @@ class Parser {
   std::unique_ptr<Expr> parse_term();
   std::unique_ptr<Expr> parse_factor();
   std::unique_ptr<Expr> parse_unary();
+  std::unique_ptr<Expr> parse_postfix();
   std::unique_ptr<Expr> parse_primary();
 
   void synchronize();

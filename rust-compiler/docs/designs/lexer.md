@@ -12,7 +12,7 @@ Token types which should be handled will be added sequentially.
 ### Keywords
 
 Keywords are reserved words for rust. for now, the lexer should support:
-fn, let, mut, if, else, while, return
+fn, let, mut, if, else, while, for, in, return
 
 ### Identifier
 Identifiers are names of functions or variables, which must start with [a-zA-Z_].
@@ -33,7 +33,7 @@ lexer should support:
 ### Punctuation
 lexer should support: 
 ```
-( , ) , { , } , ; , : , ,
+( , ) , { , } , [ , ] , ; , : , ,
 ```
 
 ### Comments

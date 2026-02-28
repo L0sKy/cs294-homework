@@ -98,6 +98,69 @@ TEST(ParserExpressions, Assignment) {
   EXPECT_FALSE(had_error);
 }
 
+TEST(ParserFunctions, EmptyBodyAndMultipleStatements) {
+  const char* input =
+      "fn empty() {}\n"
+      "fn multi() { let x = 1; return x; }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_FALSE(had_error);
+}
+
+TEST(ParserStatements, NestedCompoundStatements) {
+  const char* input = "fn nested() { { { return; } } }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_FALSE(had_error);
+}
+
+TEST(ParserExpressions, PrecedenceAndParentheses) {
+  const char* input =
+      "fn prec(a: i32, b: i32, c: i32) { return a * b + c; }\n"
+      "fn prec2(a: i32, b: i32, c: i32) { return a * (b + c); }\n"
+      "fn prec3(x: i32, y: i32, z: i32) { return x + y * z; }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_FALSE(had_error);
+}
+
+TEST(ParserExpressions, Indexing) {
+  const char* input =
+      "fn index(a: i32, b: i32) { let x = arr[a]; let y = m[a][b]; return y; }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_FALSE(had_error);
+}
+
+TEST(ParserStatements, ForAndWhileLoops) {
+  const char* input =
+      "fn loop_for() { for i in arr { return; } return; }\n"
+      "fn loop_while(x: i32) { while x < 3 { return x; } }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_FALSE(had_error);
+}
+
+TEST(ParserErrors, ForMissingIn) {
+  const char* input = "fn bad() { for i arr { return; } }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_TRUE(had_error);
+}
+
+TEST(ParserErrors, IndexMissingBracket) {
+  const char* input = "fn bad() { let x = arr[1; }\n";
+  bool had_error = false;
+  std::unique_ptr<Program> program = ParseProgram(input, &had_error);
+  ASSERT_TRUE(program);
+  EXPECT_TRUE(had_error);
+}
 TEST(ParserErrors, MissingBrace) {
   const char* input = "fn main(x: i32) { return x;";
   bool had_error = false;

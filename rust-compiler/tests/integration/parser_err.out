@@ -1,1 +1,11 @@
 TranslationUnitDecl
+`-FunctionDecl <1:1> bad
+  `-CompoundStmt <1:10>
+    |-ForStmt <2:3> i
+    | |-DeclRefExpr <2:9> arr
+    | `-CompoundStmt <2:13>
+    |   `-ReturnStmt <2:15>
+    `-LetStmt <3:3> x
+      `-IndexExpr <3:14>
+        |-DeclRefExpr <3:11> arr
+        `-IntegerLiteral <3:15> 1

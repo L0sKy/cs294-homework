@@ -7,6 +7,7 @@
 - Extended parser with `let`, `if/else` (including `else if`), and assignment support.
 - Added a follow-up plan document for parser extensions.
 - Added a plan and implementation for Rust-style block statements without semicolons.
+- Added for-loop parsing and array indexing with additional tests and fixtures.
 
 ## 1) Action items completed
 - [x] Added parser design documentation.
@@ -42,6 +43,8 @@
   - `docs/plans/PLAN-parser-extensions.md`
 - Added plan document:
   - `docs/plans/PLAN-parser-semicolons.md`
+- Added plan document:
+  - `docs/plans/PLAN-parser-suggested-tests.md`
 
 ## 3) Technical decisions and notes
 - AST dump uses virtual `dump()` on subclasses and a shared prefix helper to match
@@ -53,6 +56,7 @@
 - Assignment is parsed as a right-associative expression node and emitted as
   `AssignExpr '='` in the dump for clarity.
 - Block statements (`if/else`, `while`, `{...}`) no longer require semicolons.
+- Added `for` loops and postfix indexing with `[` `]`, plus error recovery for missing `in`.
 
 ## 4) Tests
 - `cmake -S . -B build -DBUILD_TESTING=ON`

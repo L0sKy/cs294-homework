@@ -10,7 +10,7 @@
 namespace {
 
 const std::unordered_set<std::string> kKeywords = {
-    "fn", "let", "mut", "if", "else", "while", "return",
+    "fn", "let", "mut", "if", "else", "while", "for", "in", "return",
 };
 
 const std::unordered_set<std::string> kBooleans = {"true", "false"};
@@ -169,8 +169,8 @@ class LexerImpl {
       return Token(TokenType::Operator, std::string(1, ch), start_line, start_col);
     }
 
-    if (ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == ';' || ch == ':' ||
-        ch == ',') {
+    if (ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '[' || ch == ']' || ch == ';' ||
+        ch == ':' || ch == ',') {
       Advance();
       return Token(TokenType::Punctuation, std::string(1, ch), start_line, start_col);
     }

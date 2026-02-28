@@ -89,6 +89,17 @@ IfStmt::IfStmt(std::unique_ptr<Expr> condition,
       line(line),
       col(col) {}
 
+ForStmt::ForStmt(std::string name,
+                 std::unique_ptr<Expr> iterable,
+                 std::unique_ptr<CompoundStmt> body,
+                 size_t line,
+                 size_t col)
+    : name(std::move(name)),
+      iterable(std::move(iterable)),
+      body(std::move(body)),
+      line(line),
+      col(col) {}
+
 ReturnStmt::ReturnStmt(std::unique_ptr<Expr> value, size_t line, size_t col)
     : value(std::move(value)), line(line), col(col) {}
 
@@ -122,6 +133,12 @@ ParenExpr::ParenExpr(std::unique_ptr<Expr> expr, size_t line, size_t col)
 
 AssignExpr::AssignExpr(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs, size_t line, size_t col)
     : lhs(std::move(lhs)), rhs(std::move(rhs)), line(line), col(col) {}
+
+IndexExpr::IndexExpr(std::unique_ptr<Expr> target,
+                     std::unique_ptr<Expr> index,
+                     size_t line,
+                     size_t col)
+    : target(std::move(target)), index(std::move(index)), line(line), col(col) {}
 
 void Program::dump(std::ostream& out, const DumpPrefix& prefix) const {
   DumpLine(out, prefix, "TranslationUnitDecl");
@@ -209,6 +226,30 @@ void IfStmt::dump(std::ostream& out, const DumpPrefix& prefix) const {
   }
 }
 
+void ForStmt::dump(std::ostream& out, const DumpPrefix& prefix) const {
+  const std::string label = "ForStmt " + FormatLocation(line, col) + " " + name;
+  DumpLine(out, prefix, label);
+
+  size_t total_children = 0;
+  if (iterable) {
+    ++total_children;
+  }
+  if (body) {
+    ++total_children;
+  }
+
+  size_t index = 0;
+  if (iterable) {
+    const bool is_last = (index + 1 == total_children);
+    iterable->dump(out, ChildPrefix(prefix, is_last));
+    ++index;
+  }
+  if (body) {
+    const bool is_last = (index + 1 == total_children);
+    body->dump(out, ChildPrefix(prefix, is_last));
+  }
+}
+
 void ReturnStmt::dump(std::ostream& out, const DumpPrefix& prefix) const {
   const std::string label = "ReturnStmt " + FormatLocation(line, col);
   DumpLine(out, prefix, label);
@@ -288,5 +329,18 @@ void AssignExpr::dump(std::ostream& out, const DumpPrefix& prefix) const {
     lhs->dump(out, ChildPrefix(prefix, true));
   } else if (rhs) {
     rhs->dump(out, ChildPrefix(prefix, true));
+  }
+}
+
+void IndexExpr::dump(std::ostream& out, const DumpPrefix& prefix) const {
+  const std::string label = "IndexExpr " + FormatLocation(line, col);
+  DumpLine(out, prefix, label);
+  if (target && index) {
+    target->dump(out, ChildPrefix(prefix, false));
+    index->dump(out, ChildPrefix(prefix, true));
+  } else if (target) {
+    target->dump(out, ChildPrefix(prefix, true));
+  } else if (index) {
+    index->dump(out, ChildPrefix(prefix, true));
   }
 }

@@ -101,6 +101,22 @@ struct IfStmt : Stmt {
   void dump(std::ostream& out, const DumpPrefix& prefix) const override;
 };
 
+struct ForStmt : Stmt {
+  std::string name;
+  std::unique_ptr<Expr> iterable;
+  std::unique_ptr<CompoundStmt> body;
+  size_t line = 0;
+  size_t col = 0;
+
+  ForStmt(std::string name,
+          std::unique_ptr<Expr> iterable,
+          std::unique_ptr<CompoundStmt> body,
+          size_t line,
+          size_t col);
+
+  void dump(std::ostream& out, const DumpPrefix& prefix) const override;
+};
+
 struct ReturnStmt : Stmt {
   std::unique_ptr<Expr> value;
   size_t line = 0;
@@ -199,6 +215,20 @@ struct AssignExpr : Expr {
   size_t col = 0;
 
   AssignExpr(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs, size_t line, size_t col);
+
+  void dump(std::ostream& out, const DumpPrefix& prefix) const override;
+};
+
+struct IndexExpr : Expr {
+  std::unique_ptr<Expr> target;
+  std::unique_ptr<Expr> index;
+  size_t line = 0;
+  size_t col = 0;
+
+  IndexExpr(std::unique_ptr<Expr> target,
+            std::unique_ptr<Expr> index,
+            size_t line,
+            size_t col);
 
   void dump(std::ostream& out, const DumpPrefix& prefix) const override;
 };

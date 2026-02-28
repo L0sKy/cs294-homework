@@ -22,4 +22,27 @@ TranslationUnitDecl
     |       `-BinaryOperator '-' <6:39>
     |         |-DeclRefExpr <6:37> x
     |         `-IntegerLiteral <6:41> 1
-    `-ReturnStmt <7:3>
+    |-LetStmt <7:3> idx
+    | `-IndexExpr <7:16>
+    |   |-DeclRefExpr <7:13> arr
+    |   `-BinaryOperator '+' <7:19>
+    |     |-DeclRefExpr <7:17> x
+    |     `-IntegerLiteral <7:21> 1
+    |-LetStmt <8:3> v
+    | `-IndexExpr <8:15>
+    |   |-IndexExpr <8:12>
+    |   | |-DeclRefExpr <8:11> m
+    |   | `-DeclRefExpr <8:13> x
+    |   `-IntegerLiteral <8:16> 1
+    |-ForStmt <9:3> i
+    | |-DeclRefExpr <9:12> arr
+    | `-CompoundStmt <9:16>
+    |   `-ReturnStmt <9:18>
+    |-WhileStmt <10:3>
+    | |-BinaryOperator '<' <10:11>
+    | | |-DeclRefExpr <10:9> x
+    | | `-IntegerLiteral <10:13> 3
+    | `-CompoundStmt <10:15>
+    |   `-ReturnStmt <10:17>
+    |     `-DeclRefExpr <10:24> x
+    `-ReturnStmt <11:3>

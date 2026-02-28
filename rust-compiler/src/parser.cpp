@@ -139,7 +139,8 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse_statement_list() {
     const Token& start = peek();
     std::unique_ptr<Stmt> stmt = parse_statement();
     bool is_block = false;
-    if (IsKeyword(start, "if") || IsKeyword(start, "while") || IsPunct(start, "{")) {
+    if (IsKeyword(start, "if") || IsKeyword(start, "while") || IsKeyword(start, "for") ||
+        IsPunct(start, "{")) {
       is_block = true;
     }
     statements.push_back(std::move(stmt));
@@ -165,6 +166,9 @@ std::vector<std::unique_ptr<Stmt>> Parser::parse_statement_list() {
 std::unique_ptr<Stmt> Parser::parse_statement() {
   if (IsKeyword(peek(), "let")) {
     return parse_let_stmt();
+  }
+  if (IsKeyword(peek(), "for")) {
+    return parse_for_stmt();
   }
   if (IsKeyword(peek(), "if")) {
     return parse_if_stmt();
@@ -198,6 +202,20 @@ std::unique_ptr<Stmt> Parser::parse_let_stmt() {
   std::unique_ptr<Expr> init = parse_expression();
   return std::make_unique<LetStmt>(name.value(), is_mutable, type_name, std::move(init),
                                    kw.line(), kw.col());
+}
+
+std::unique_ptr<Stmt> Parser::parse_for_stmt() {
+  const Token& kw = expect(TokenType::Keyword, "expected 'for'", "for");
+  const Token& name = expect(TokenType::Identifier, "expected loop variable");
+  if (IsKeyword(peek(), "in")) {
+    advance();
+  } else {
+    report_error(peek(), "expected 'in'");
+  }
+  std::unique_ptr<Expr> iterable = parse_expression();
+  std::unique_ptr<CompoundStmt> body = parse_compound_statement();
+  return std::make_unique<ForStmt>(name.value(), std::move(iterable), std::move(body), kw.line(),
+                                   kw.col());
 }
 
 std::unique_ptr<Stmt> Parser::parse_if_stmt() {
@@ -301,7 +319,19 @@ std::unique_ptr<Expr> Parser::parse_unary() {
     std::unique_ptr<Expr> operand = parse_unary();
     return std::make_unique<UnaryExpr>(op.value(), std::move(operand), op.line(), op.col());
   }
-  return parse_primary();
+  return parse_postfix();
+}
+
+std::unique_ptr<Expr> Parser::parse_postfix() {
+  std::unique_ptr<Expr> expr = parse_primary();
+  while (match(TokenType::Punctuation, "[")) {
+    const Token& lbracket = tokens_[index_ - 1];
+    std::unique_ptr<Expr> index_expr = parse_expression();
+    expect(TokenType::Punctuation, "expected ']'", "]");
+    expr = std::make_unique<IndexExpr>(std::move(expr), std::move(index_expr), lbracket.line(),
+                                       lbracket.col());
+  }
+  return expr;
 }
 
 std::unique_ptr<Expr> Parser::parse_primary() {
